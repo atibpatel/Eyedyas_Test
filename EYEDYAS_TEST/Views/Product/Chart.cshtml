@@ -1,0 +1,132 @@
+﻿
+@{
+    ViewBag.Title = "Chart";
+}
+
+<h2>Chart</h2>
+
+<!DOCTYPE HTML>
+<html>
+<head>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script type="text/javascript">
+
+        $(document).ready(function () {
+
+            $.ajax({
+                url: "/Product/GetChartAll",
+                type: "GET",
+               // data: { range1: range11, range2: range22 },
+                success: function (response) {
+                    if (response.length > 0)
+                    {
+                        var Datapoints = [];
+                        let count = 1;
+                        $.each(response, function (key, value) {
+                            Datapoints.push({ x: count, y: value.PRICE, label: value.PTITLE });
+                            count++;
+                        });
+
+                        chartload(Datapoints);
+                    }
+                    else {
+                        alert("No data available");
+                    }
+                },
+                error: function (response) {
+                    alert(response);
+                }
+            });
+
+
+
+            $('#range').change(function () {
+                debugger;
+                var selectedVal = $('#range option:selected').attr('value');
+                var range11 = selectedVal.split('-')[0];
+                var range22 = selectedVal.split('-')[1];
+               
+               
+                $.ajax({
+                    url: "/Product/Chart",
+                    type: "POST",
+                    data: { range1: range11, range2: range22},
+                    success: function (response) {
+                        if (response.length > 0) {
+                            var Datapoints = [];
+                            let count = 1;
+                            $.each(response, function (key, value) {
+                                Datapoints.push({ x: count, y: value.PRICE, label: value.PTITLE });
+                                count++;
+                            });
+                           
+                            chartload(Datapoints);
+                        }
+                        else {
+                            alert("No data available");
+                        }
+                    },
+                    error: function (response) {
+                        alert(response);
+                    }
+                });
+            });
+
+        });
+       
+
+
+        function chartload(Datapoints)
+        {
+            var chart = new CanvasJS.Chart("chartContainer",
+                {
+                    title: {
+                        text: "Product Chart"
+                    },
+                    axisY: {
+                        title: "Price"
+                    },
+                    legend: {
+                        verticalAlign: "bottom",
+                        horizontalAlign: "center"
+                    },
+                    data: [
+
+                        {
+                            color: "#B0D0B0",
+                            type: "column",
+                            showInLegend: true,
+                            legendMarkerType: "none",
+                            legendText: "Products",
+                            dataPoints: Datapoints
+                            
+                        }
+                    ]
+                });
+
+            chart.render();
+        }
+
+
+    </script>
+    <script type="text/javascript" src="https://canvasjs.com/assets/script/canvasjs.min.js"></script>
+   
+</head>
+<body>
+    <div class="form-horizontal">
+        <div class="form-group">
+            <label for="cars">Product Price Range</label>
+            <div class="col-md-10">
+                <select name="range" id="range">
+                    <option value="0-1000">0-1000</option>
+                    <option value="1001-2000">1001-2000</option>
+                    <option value="2001-3000">2001-3000</option>
+                    <option value="3001-5000">3001-5000</option>
+                </select>
+                <div id="chartContainer" style="height: 300px; width: 100%;">
+                </div>
+                </div>
+            </div>
+    </div>
+</body>
+</html>
